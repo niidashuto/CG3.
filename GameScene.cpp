@@ -20,6 +20,7 @@ GameScene::~GameScene()
 	delete modelGround;
 	delete modelFighter;
 	delete camera;
+	delete light;
 }
 
 void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
@@ -71,6 +72,13 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	objSphere->SetModel(modelSphere);
 	objFighter->SetPosition({ +1,0,0 });
 	objSphere->SetPosition({ -1,1,0 });
+
+	//ライト生成
+	light = Light::Create();
+	//ライト色を設定
+	light->SetLightColor({ 1,1,1 });
+	//3Dオブジェクトにライトをセット
+	Object3d::SetLight(light);
 }
 
 void GameScene::Update()
@@ -81,6 +89,46 @@ void GameScene::Update()
 	objGround->Update();
 	objFighter->Update();
 	objSphere->Update();
+	light->Update();
+
+	//オブジェクトの回転
+	{
+		XMFLOAT3 rot = objSphere->GetRotation();
+		rot.y += 1.0f;
+		objSphere->SetRotation(rot);
+		objFighter->SetRotation(rot);
+	}
+
+	{
+		static XMVECTOR lightDir = XMVectorSet(0, 1, 5, 0);
+		if (input->PushKey(DIK_W)) { lightDir.m128_f32[1] += 1.0f; }
+		else if (input->PushKey(DIK_S)) { lightDir.m128_f32[1] -= 1.0f; }
+		if (input->PushKey(DIK_D)) { lightDir.m128_f32[0] += 1.0f; }
+		else if (input->PushKey(DIK_A)) { lightDir.m128_f32[0] -= 1.0f; }
+
+		light->SetLightDir(lightDir);
+
+		std::ostringstream debugstr;
+		debugstr << "lightDirFactor("
+			<< std::fixed << std::setprecision(2)//小数点以下二桁まで
+			<< lightDir.m128_f32[0] << ","//x
+			<< lightDir.m128_f32[1] << ","//y
+			<< lightDir.m128_f32[2] << ")",//z
+
+			debugText.Print(debugstr.str(), 50, 130, 1.0f);
+
+		debugstr.str("");
+		debugstr.clear();
+
+		const XMFLOAT3& cameraPos = camera->GetEye();
+		debugstr<<"cameraPos("
+			<< std::fixed << std::setprecision(2)//小数点以下二桁まで
+			<< cameraPos.x << ","//x
+			<< cameraPos.y << ","//y
+			<< cameraPos.z << ")",//z
+
+			debugText.Print(debugstr.str(), 50, 150, 1.0f);
+	}
 
 	debugText.Print("AD: move camera LeftRight", 50, 50, 1.0f);
 	debugText.Print("WS: move camera UpDown", 50, 70, 1.0f);
@@ -113,8 +161,8 @@ void GameScene::Draw()
 	Object3d::PreDraw(cmdList);
 
 	// 3Dオブクジェクトの描画
-	//objSkydome->Draw();
-	//objGround->Draw();
+	objSkydome->Draw();
+	objGround->Draw();
 	objFighter->Draw();
 	objSphere->Draw();
 
