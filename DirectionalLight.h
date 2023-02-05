@@ -6,7 +6,7 @@
 /// <summary>
 /// ライト
 /// </summary>
-class Light
+class DirectionalLight
 {
 private://エイリアス
 	// Microsoft::WRL::を省略
@@ -30,7 +30,7 @@ private://静的メンバ変数
 public://静的メンバ関数
 	static void StaticInitialize(ID3D12Device* device);
 
-	static Light* Create();
+	static DirectionalLight* Create();
 private://メンバ変数
 	//定数バッファ
 	ComPtr<ID3D12Resource>constBuff;
@@ -40,6 +40,9 @@ private://メンバ変数
 	XMFLOAT3 lightcolor = { 1,1,1 };
 	//ダーティフラグ
 	bool dirty = false;
+
+	//有効フラグ
+	bool active = false;
 
 	D3D12_HEAP_PROPERTIES cbHeapProp{};
 
@@ -57,5 +60,10 @@ public://メンバ関数
 	void Update();
 
 	void Draw(ID3D12GraphicsCommandList* cmdList,UINT rootParameterIndex);
+
+	//有効フラグをセット
+	inline void SetActive(bool active) { this->active = active; }
+	//有効チェック
+	inline bool IsActive() { return active; }
 };
 

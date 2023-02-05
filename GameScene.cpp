@@ -20,7 +20,7 @@ GameScene::~GameScene()
 	delete modelGround;
 	delete modelFighter;
 	delete camera;
-	delete light;
+	delete lightGroup;
 }
 
 void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
@@ -74,11 +74,9 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	objSphere->SetPosition({ -1,1,0 });
 
 	//ライト生成
-	light = Light::Create();
-	//ライト色を設定
-	light->SetLightColor({ 1,1,1 });
+	lightGroup = LightGroup::Create();
 	//3Dオブジェクトにライトをセット
-	Object3d::SetLight(light);
+	Object3d::SetLightGroup(lightGroup);
 }
 
 void GameScene::Update()
@@ -89,7 +87,7 @@ void GameScene::Update()
 	objGround->Update();
 	objFighter->Update();
 	objSphere->Update();
-	light->Update();
+	lightGroup->Update();
 
 	//オブジェクトの回転
 	{
@@ -106,7 +104,7 @@ void GameScene::Update()
 		if (input->PushKey(DIK_D)) { lightDir.m128_f32[0] += 1.0f; }
 		else if (input->PushKey(DIK_A)) { lightDir.m128_f32[0] -= 1.0f; }
 
-		light->SetLightDir(lightDir);
+		//lightGroup->SetDirLightDir(lightDir);
 
 		std::ostringstream debugstr;
 		debugstr << "lightDirFactor("
